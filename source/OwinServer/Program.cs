@@ -1,6 +1,5 @@
 ﻿using System;
 using FWF.KeyExchange.Owin;
-using FWF.KeyExchange.Sample.OwinApi.Handlers;
 using Microsoft.Owin.Hosting;
 using Owin;
 
@@ -8,8 +7,6 @@ namespace FWF.KeyExchange.Sample.OwinApi
 {
     class Program
     {
-        private static RootHandler _rootHandler = new RootHandler();
-        private static MessageSendHandler _messageSendHandler = new MessageSendHandler();
 
         static void Main(string[] args)
         {
@@ -26,15 +23,13 @@ namespace FWF.KeyExchange.Sample.OwinApi
 
         private static void WebAppConfig(IAppBuilder appBuilder)
         {
+            var bootstrapper = new FWFKeyExchangeBootstrapper();
+
             // Use KeyExchange middleware to handle the key exchange
-            var options = new OwinKeyExchangeOptions();
-            appBuilder.UseKeyExchange(options);
+            appBuilder.UseKeyExchange(bootstrapper);
 
-            // Handle any request to the root path
-            appBuilder.Use(_rootHandler.Handle);
-
-            // DEMO: Handle any incoming message that has been encrypted with the shared key
-            appBuilder.Use(_messageSendHandler.Handle);
+            // Handle any incoming message that has been encrypted with the shared key
+            appBuilder.UseKeyExchangeMessage(bootstrapper);
         }
     }
 }
