@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FWF.KeyExchange.Sample.OwinApi", "Samples\FWF.KeyExchange.Sample.OwinApi\FWF.KeyExchange.Sample.OwinApi.csproj", "{F475B85D-8B68-4C20-8E33-82B400127B90}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OwinServer", "OwinServer\OwinServer.csproj", "{F475B85D-8B68-4C20-8E33-82B400127B90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FWF.KeyExchange.Sample.OwinApiClient", "Samples\FWF.KeyExchange.Sample.OwinApiClient\FWF.KeyExchange.Sample.OwinApiClient.csproj", "{F98AEDAD-A760-4B6F-B7FA-4CB88D50F9C4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleClient", "ConsoleClient\ConsoleClient.csproj", "{F98AEDAD-A760-4B6F-B7FA-4CB88D50F9C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

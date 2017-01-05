@@ -3,17 +3,18 @@ using System.Net.Http;
 using System.Text;
 using System.Web;
 using Autofac;
+using FWF.KeyExchange;
 using FWF.KeyExchange.Bootstrap;
 
-namespace FWF.KeyExchange.Sample.OwinApiClient
+namespace ConsoleClient
 {
     class Program
     {
         static void Main(string[] args)
         {
-            var rootUrl = "https://localhost:61000/";
-
-
+            var rootUrl = "http://localhost:12345/";
+            var myEndpointId = "my";
+            
             var containerBuilder = new ContainerBuilder();
             containerBuilder.RegisterModule<FWFKeyExchangeModule>();
 
@@ -22,9 +23,7 @@ namespace FWF.KeyExchange.Sample.OwinApiClient
             var keyExchangeProvider = container.Resolve<IKeyExchangeProvider>();
             var symmetricEncryptionProvider = container.Resolve<ISymmetricEncryptionProvider>();
             var random = container.Resolve<IRandom>();
-
-            keyExchangeProvider.Start();
-            
+                        
             using (var http = new HttpClient())
             {
                 // NOTE: GET the root url to make sure the endpoint is there...
@@ -42,18 +41,20 @@ namespace FWF.KeyExchange.Sample.OwinApiClient
 
                     var remotePublicKeyData = Convert.FromBase64String(remotePublicKey);
 
-                    keyExchangeProvider.Exchange(remotePublicKeyData);
+                    keyExchangeProvider.ConfigureEndpointExchange(myEndpointId, remotePublicKeyData);
                 }
 
                 // Create a message
                 var plainTextMessage = random.AnyString(1024);
                 byte[] plainTextData = Encoding.UTF8.GetBytes(plainTextMessage);
 
+                // 
+                var sharedKey = keyExchangeProvider.GetEndpointSharedKey(myEndpointId);
                 byte[] iv;
 
                 // Encrypt the message with the shared key and a new IV
                 var encryptedMessage = symmetricEncryptionProvider.Encrypt(
-                    keyExchangeProvider.SharedKey,
+                    sharedKey,
                     plainTextData,
                     out iv
                     );

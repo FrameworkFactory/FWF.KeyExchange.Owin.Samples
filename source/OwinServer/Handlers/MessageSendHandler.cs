@@ -4,25 +4,14 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Owin;
+using FWF.KeyExchange.Owin;
 
 namespace FWF.KeyExchange.Sample.OwinApi.Handlers
 {
     internal class MessageSendHandler
     {
 
-        private readonly IKeyExchangeProvider _keyExchangeProvider;
-        private readonly ISymmetricEncryptionProvider _symmetricEncryptionProvider;
-
         private readonly Encoding _defaultEncoding = Encoding.UTF8;
-
-        public MessageSendHandler(
-            IKeyExchangeProvider keyExchangeProvider,
-            ISymmetricEncryptionProvider symmetricEncryptionProvider
-            )
-        {
-            _keyExchangeProvider = keyExchangeProvider;
-            _symmetricEncryptionProvider = symmetricEncryptionProvider;
-        }
 
         public Task Handle(IOwinContext context, Func<Task> next)
         {
@@ -31,6 +20,11 @@ namespace FWF.KeyExchange.Sample.OwinApi.Handlers
 
             if (requestMethod == "POST" && requestPath == "/send")
             {
+                // Get the KeyExchange components from the AutoFac container saved in OWIN context
+                var keyExchangeProvider = context.Environment[OwinKeyExchangeEnvironment.KeyExchangeProvider] as IKeyExchangeProvider;
+                var owinEndpointIdProvider = context.Environment[OwinKeyExchangeEnvironment.EndpointIdProvider] as IOwinEndpointIdProvider;
+                var symmetricEncryptionProvider = context.Environment[OwinKeyExchangeEnvironment.SymmetricEncryptionProvider] as ISymmetricEncryptionProvider;
+                                
                 // Get encrypted message from POST data
                 var ivString = context.Request.Query["iv"];
 
@@ -58,9 +52,15 @@ namespace FWF.KeyExchange.Sample.OwinApi.Handlers
                     messageData = stream.ToArray();
                 }
 
+                //
+                var endpointId = owinEndpointIdProvider.DetermineEndpointId(context);
+
+                // 
+                var sharedKey = keyExchangeProvider.GetEndpointSharedKey(endpointId);
+
                 // Decrypt the message
-                var decryptedData = _symmetricEncryptionProvider.Decrypt(
-                    _keyExchangeProvider.SharedKey,
+                var decryptedData = symmetricEncryptionProvider.Decrypt(
+                    sharedKey,
                     iv,
                     messageData
                     );
